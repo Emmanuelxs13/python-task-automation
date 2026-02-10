@@ -31,4 +31,4 @@ ahorrando tiempo en tareas repetitivas.
 - Automatización básica
 
 ## Author
-Emmanuel — Python Developer
+Emmanuel Berrio — FullStack Developer
