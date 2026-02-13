@@ -82,7 +82,12 @@ export const translations = {
     dashboard: {
       title: "Panel de Seguridad",
       subtitle: "Monitorea y gestiona tus escaneos de seguridad",
-      logout: "Cerrar Sesión",
+      logout: "¡Sesión cerrada exitosamente!",
+      logoutButton: "Cerrar Sesión",
+      nav: {
+        dashboard: "Panel",
+        documentation: "Documentación",
+      },
       stats: {
         totalScans: "Total de Escaneos",
         completed: "Completados",
@@ -92,10 +97,6 @@ export const translations = {
       actions: {
         searchPlaceholder: "Buscar por URL...",
         allStatus: "Todos los Estados",
-        completed: "Completados",
-        pending: "Pendientes",
-        running: "Ejecutando",
-        failed: "Fallidos",
         newScan: "Nuevo Escaneo",
       },
       table: {
@@ -253,5 +254,3 @@ export const translations = {
     // ... rest of English translations
   },
 };
-
-export type TranslationKeys = typeof translations.es;

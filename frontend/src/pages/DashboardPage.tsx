@@ -32,7 +32,7 @@ export const DashboardPage = () => {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success("Sesión cerrada exitosamente");
     navigate("/");
   };
 
@@ -58,23 +58,26 @@ export const DashboardPage = () => {
     const badges = {
       completed: {
         icon: CheckCircle,
-        class: "bg-green-100 text-green-700",
-        text: "Completed",
+        class:
+          "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+        text: "Completado",
       },
       pending: {
         icon: Clock,
-        class: "bg-yellow-100 text-yellow-700",
-        text: "Pending",
+        class:
+          "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+        text: "Pendiente",
       },
       running: {
         icon: Activity,
-        class: "bg-blue-100 text-blue-700",
-        text: "Running",
+        class:
+          "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+        text: "Ejecutando",
       },
       failed: {
         icon: XCircle,
-        class: "bg-red-100 text-red-700",
-        text: "Failed",
+        class: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+        text: "Fallido",
       },
     };
     const badge = badges[status as keyof typeof badges] || badges.pending;
@@ -259,62 +262,62 @@ export const DashboardPage = () => {
         </div>
 
         {/* Scans List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           ) : filteredScans.length === 0 ? (
             <div className="text-center py-20">
-              <Shield className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No scans found
+              <Shield className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No se encontraron escaneos
               </h3>
-              <p className="text-gray-500 mb-6">
-                Get started by creating your first security scan
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                Comienza creando tu primer escaneo de seguridad
               </p>
               <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
                 <Plus className="h-5 w-5 mr-2" />
-                Create First Scan
+                Crear Primer Escaneo
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Target URL
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      URL Objetivo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Scan Type
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Tipo de Escaneo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Estado
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Vulnerabilities
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Vulnerabilidades
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Creado
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredScans.map((scan: Scan) => (
                     <tr
                       key={scan.id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {scan.target_url}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-600 capitalize">
+                        <span className="text-sm text-gray-600 dark:text-gray-300 capitalize">
                           {scan.scan_type}
                         </span>
                       </td>
@@ -322,11 +325,11 @@ export const DashboardPage = () => {
                         {getStatusBadge(scan.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {scan.vulnerabilities?.length || 0}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {new Date(scan.created_at).toLocaleDateString()}
                       </td>
                     </tr>

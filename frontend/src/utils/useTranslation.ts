@@ -1,9 +1,2 @@
-import { useSettingsStore } from "../store/settingsStore.ts";
-import { translations } from "./translations.ts";
-
-export function useTranslation() {
-  const language = useSettingsStore((state) => state.language);
-  const t = translations[language];
-
-  return { t, language };
-}
+// Este archivo ya no se usa - el sistema de traducciones fue removido
+// Todo está en español directamente en los componentes
