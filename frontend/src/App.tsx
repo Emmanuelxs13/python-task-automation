@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,8 +7,9 @@ import { LoginPage } from "./pages/LoginPage.tsx";
 import { RegisterPage } from "./pages/RegisterPage.tsx";
 import { DashboardPage } from "./pages/DashboardPage.tsx";
 import { DocsPage } from "./pages/DocsPage.tsx";
+import { SettingsButton } from "./components/SettingsButton.tsx";
 import { useAuthStore } from "./store/authStore.ts";
-import { useEffect } from "react";
+import { useSettingsStore } from "./store/settingsStore.ts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,15 +23,43 @@ const queryClient = new QueryClient({
 function App() {
   const loadFromStorage = useAuthStore((state) => state.loadFromStorage);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const theme = useSettingsStore((state) => state.theme);
 
   useEffect(() => {
     loadFromStorage();
   }, [loadFromStorage]);
 
+  // Aplicar tema cuando cambia - CON LIMPIEZA COMPLETA
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Siempre remover primero
+    root.classList.remove("dark");
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else if (theme === "system") {
+      const isDark = globalThis.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      if (isDark) {
+        root.classList.add("dark");
+      }
+    }
+
+    console.log(
+      "🎨 Theme applied:",
+      theme,
+      "Dark mode:",
+      root.classList.contains("dark"),
+    );
+  }, [theme]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Toaster position="top-right" richColors />
+        <SettingsButton />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />

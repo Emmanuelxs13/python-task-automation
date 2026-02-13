@@ -22,24 +22,24 @@ export const RegisterPage = () => {
       await authService.register({ email, password, full_name: fullName });
       const tokenResponse = await authService.login({ email, password });
 
-      // Guardar token ANTES de llamar getCurrentUser
+      // Guardar token PRIMERO
       localStorage.setItem("token", tokenResponse.access_token);
 
       const user = await authService.getCurrentUser();
 
       setAuth(user, tokenResponse.access_token);
-      toast.success("Account created successfully! 🎉");
+      toast.success("¡Cuenta creada exitosamente! 🎉");
       navigate("/dashboard");
     } catch (error) {
       const err = error as { response?: { data?: { detail?: string } } };
-      toast.error(err.response?.data?.detail || "Registration failed");
+      toast.error(err.response?.data?.detail || "Error al registrar");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center mb-8 group">
@@ -52,23 +52,23 @@ export const RegisterPage = () => {
         </Link>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Create Account
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Crear Cuenta
           </h1>
-          <p className="text-gray-600">
-            Start securing your applications today
+          <p className="text-gray-600 dark:text-gray-400">
+            Comienza a asegurar tus aplicaciones hoy
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
               >
-                Full Name
+                Nombre Completo
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -78,8 +78,8 @@ export const RegisterPage = () => {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="John Doe"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Juan Pérez"
                 />
               </div>
             </div>
@@ -87,9 +87,9 @@ export const RegisterPage = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
               >
-                Email Address
+                Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -99,8 +99,8 @@ export const RegisterPage = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="you@company.com"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="tu@empresa.com"
                 />
               </div>
             </div>
@@ -108,9 +108,9 @@ export const RegisterPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
               >
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -121,11 +121,13 @@ export const RegisterPage = () => {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="••••••••"
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Mínimo 6 caracteres
+              </p>
             </div>
 
             <button
@@ -154,11 +156,11 @@ export const RegisterPage = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Creating account...
+                  Creando cuenta...
                 </span>
               ) : (
                 <>
-                  Create Account
+                  Crear Cuenta
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
@@ -166,13 +168,13 @@ export const RegisterPage = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              ¿Ya tienes una cuenta?{" "}
               <Link
                 to="/login"
-                className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold hover:underline"
               >
-                Sign in
+                Iniciar sesión
               </Link>
             </p>
           </div>
@@ -182,9 +184,9 @@ export const RegisterPage = () => {
         <div className="mt-6 text-center">
           <Link
             to="/"
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center"
           >
-            <span>← Back to home</span>
+            <span>← Volver al inicio</span>
           </Link>
         </div>
       </div>
