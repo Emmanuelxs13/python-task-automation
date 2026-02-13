@@ -2,6 +2,7 @@
 Scan schemas for request/response validation
 """
 
+from app.schemas.vulnerability import VulnerabilityResponse
 from pydantic import BaseModel, HttpUrl, Field, field_validator
 from datetime import datetime
 from typing import Optional, List
@@ -26,8 +27,10 @@ class ScanStatusEnum(str, Enum):
 
 class ScanCreate(BaseModel):
     """Schema for creating a new scan"""
-    target_url: str = Field(..., description="URL or domain to scan", min_length=3, max_length=500)
-    scan_type: ScanTypeEnum = Field(default=ScanTypeEnum.BASIC, description="Type of scan to perform")
+    target_url: str = Field(..., description="URL or domain to scan",
+                            min_length=3, max_length=500)
+    scan_type: ScanTypeEnum = Field(
+        default=ScanTypeEnum.BASIC, description="Type of scan to perform")
 
     @field_validator('target_url')
     @classmethod
@@ -76,5 +79,4 @@ class ScanListResponse(ScanBase):
 
 
 # Import for type hinting
-from app.schemas.vulnerability import VulnerabilityResponse
 ScanResponse.model_rebuild()

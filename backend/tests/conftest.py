@@ -9,6 +9,9 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, get_db
 from main import app
+from app.models.user import User
+from app.security.password import get_password_hash
+from app.security.jwt import create_access_token
 
 # Test database (in-memory SQLite)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -43,3 +46,23 @@ def client(db):
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def test_user(test_db):
+    """Create a test user"""
+    user = User(
+        email="test@example.com",
+        full_name="Test User",
+        hashed_password=get_password_hash("testpassword123")
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+    return user
+
+
+@pytest.fixture
+def test_user_token(test_user):
+    """Create an access token for the test user"""
+    return create_access_token(data={"sub": test_user.email})

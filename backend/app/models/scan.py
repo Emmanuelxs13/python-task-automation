@@ -30,7 +30,7 @@ class ScanType(str, enum.Enum):
 class Scan(Base):
     """
     Scan model representing a security scan
-    
+
     Attributes:
         id: Unique scan identifier
         user_id: ID of the user who created the scan
@@ -43,13 +43,18 @@ class Scan(Base):
     __tablename__ = "scans"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey(
+        "users.id", ondelete="CASCADE"), nullable=False)
     target_url = Column(String(500), nullable=False)
-    scan_type = Column(SQLEnum(ScanType), default=ScanType.BASIC, nullable=False)
-    status = Column(SQLEnum(ScanStatus), default=ScanStatus.PENDING, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    scan_type = Column(SQLEnum(ScanType),
+                       default=ScanType.BASIC, nullable=False)
+    status = Column(SQLEnum(ScanStatus),
+                    default=ScanStatus.PENDING, nullable=False)
+    created_at = Column(DateTime(timezone=True),
+                        server_default=func.now(), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     user = relationship("User", back_populates="scans")
-    vulnerabilities = relationship("Vulnerability", back_populates="scan", cascade="all, delete-orphan")
+    vulnerabilities = relationship(
+        "Vulnerability", back_populates="scan", cascade="all, delete-orphan")
