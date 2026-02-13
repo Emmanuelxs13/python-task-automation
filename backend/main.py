@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import auth, scans
+from app.api import auth, scans, reports
 
 # Load environment variables
 load_dotenv()
@@ -46,6 +46,12 @@ app.include_router(
     scans.router,
     prefix=f"{settings.API_V1_PREFIX}/scans",
     tags=["Scans"]
+)
+
+app.include_router(
+    reports.router,
+    prefix=f"{settings.API_V1_PREFIX}",
+    tags=["Reports & Statistics"]
 )
 
 

@@ -1,29 +1,41 @@
 """
-Tests configuration and fixtures
+Test configuration and fixtures
 """
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from app.core.database import Base, get_db
-from main import app
-from app.models.user import User
-from app.security.password import get_password_hash
 from app.security.jwt import create_access_token
+from app.security.password import get_password_hash
+from app.models.user import User
+from app.core.database import Base, get_db
+from app.main import app
+from sqlalchemy.pool import StaticPool
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import create_engine
+from fastapi.testclient import TestClient
+import pytest
+import sys
+import os
+from pathlib import Path
 
-# Test database (in-memory SQLite)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={
-                       "check_same_thread": False})
+# Add backend directory to Python path
+backend_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(backend_dir))
+
+
+# Create test database
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
 
 
 @pytest.fixture(scope="function")
-def db():
-    """Create test database"""
+def test_db():
+    """Create a fresh database for each test"""
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
@@ -34,13 +46,13 @@ def db():
 
 
 @pytest.fixture(scope="function")
-def client(db):
-    """Create test client"""
+def client(test_db):
+    """Create a test client"""
     def override_get_db():
         try:
-            yield db
+            yield test_db
         finally:
-            db.close()
+            test_db.close()
 
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
