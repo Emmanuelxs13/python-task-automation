@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Shield,
@@ -7,12 +8,45 @@ import {
   ChevronRight,
   Search,
   Code,
-  Settings,
   BarChart,
   Zap,
 } from "lucide-react";
 
 export const DocsPage = () => {
+  const [activeSection, setActiveSection] = useState("intro");
+
+  // Detectar sección visible al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["intro", "install", "config", "scans", "reports"];
+      const scrollPosition = window.scrollY + 150;
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetBottom = offsetTop + element.offsetHeight;
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navItems = [
+    { id: "intro", label: "Introducción" },
+    { id: "install", label: "Instalación" },
+    { id: "config", label: "Configuración" },
+    { id: "scans", label: "Tipos de Escaneo" },
+    { id: "reports", label: "Reportes" },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navbar */}
@@ -76,12 +110,12 @@ export const DocsPage = () => {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Comienza a usar SecureCheck en menos de 5 minutos
             </p>
-            <Link
-              to="#"
+            <a
+              href="#intro"
               className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Leer más <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+            </a>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
@@ -94,12 +128,12 @@ export const DocsPage = () => {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Documentación completa de nuestra API REST
             </p>
-            <Link
-              to="#"
+            <a
+              href="#config"
               className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Ver API <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+            </a>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow">
@@ -112,12 +146,12 @@ export const DocsPage = () => {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Guías y recomendaciones de seguridad
             </p>
-            <Link
-              to="#"
+            <a
+              href="#scans"
               className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Explorar <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -129,56 +163,39 @@ export const DocsPage = () => {
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 Contenido
               </h3>
-              <nav className="space-y-2">
-                <a
-                  href="#intro"
-                  className="block px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
-                >
-                  Introducción
-                </a>
-                <a
-                  href="#install"
-                  className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  Instalación
-                </a>
-                <a
-                  href="#config"
-                  className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  Configuración
-                </a>
-                <a
-                  href="#scans"
-                  className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  Tipos de Escaneo
-                </a>
-                <a
-                  href="#reports"
-                  className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  Reportes
-                </a>
+              <nav className="space-y-1">
+                {navItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      activeSection === item.id
+                        ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400 hover:pl-5"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
               </nav>
 
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">
                   ¿Necesitas ayuda?
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <a
-                    href="#"
-                    className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                    href="#videos"
+                    className="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
                   >
-                    <Video className="h-4 w-4 mr-2" />
+                    <Video className="h-4 w-4 mr-2 flex-shrink-0" />
                     Video Tutoriales
                   </a>
                   <a
-                    href="#"
-                    className="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                    href="#support"
+                    className="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-all duration-200"
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                    <MessageCircle className="h-4 w-4 mr-2 flex-shrink-0" />
                     Soporte en Vivo
                   </a>
                 </div>
@@ -189,7 +206,7 @@ export const DocsPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md border border-gray-200 dark:border-gray-700">
-              <section id="intro" className="mb-12">
+              <section id="intro" className="mb-12 scroll-mt-24">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                   Introducción a SecureCheck
                 </h2>
@@ -205,12 +222,12 @@ export const DocsPage = () => {
                 </p>
               </section>
 
-              <section id="install" className="mb-12">
+              <section id="install" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                   Instalación
                 </h2>
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-4">
-                  <code className="text-sm text-gray-800 dark:text-gray-200">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-700">
+                  <code className="text-sm text-gray-800 dark:text-gray-200 font-mono">
                     npm install @securecheck/cli
                   </code>
                 </div>
@@ -221,7 +238,7 @@ export const DocsPage = () => {
                 </p>
               </section>
 
-              <section id="config" className="mb-12">
+              <section id="config" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                   Configuración Básica
                 </h2>
@@ -239,12 +256,12 @@ export const DocsPage = () => {
                 </div>
               </section>
 
-              <section id="scans">
+              <section id="scans" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                   Tipos de Escaneo Disponibles
                 </h2>
                 <div className="space-y-4">
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-2">
                       Escaneo SSL/TLS
                     </h3>
@@ -253,7 +270,7 @@ export const DocsPage = () => {
                       cifrados de tu sitio web.
                     </p>
                   </div>
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-2">
                       Headers de Seguridad
                     </h3>
@@ -262,7 +279,7 @@ export const DocsPage = () => {
                       críticas.
                     </p>
                   </div>
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-2">
                       Escaneo Completo
                     </h3>
@@ -272,6 +289,17 @@ export const DocsPage = () => {
                     </p>
                   </div>
                 </div>
+              </section>
+
+              <section id="reports" className="scroll-mt-24">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  Reportes y Análisis
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  Todos los escaneos generan reportes detallados con
+                  recomendaciones específicas para mejorar la seguridad de tu
+                  aplicación.
+                </p>
               </section>
             </div>
           </div>
