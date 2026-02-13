@@ -82,3 +82,40 @@ Thumbs.db
 
 # Documentation (generated)
 docs/
+
+# Sensitive / local files (added to prevent accidental commit)
+# Explicit local database files
+securecheck.db
+test.db
+
+# Environment and credentials
+.env.*
+.env.production
+.env.staging
+credentials.json
+google-credentials.json
+
+# AWS / cloud credentials
+.aws/credentials
+aws_credentials
+
+# Private keys / certificates
+*.pem
+*.key
+private_keys/
+jwt_private_key.pem
+jwt_public_key.pem
+id_rsa
+id_rsa.pub
+*.p12
+*.jks
+
+# Secrets folder
+secrets/
+
+# Python caches and type checkers
+.mypy_cache/
+.pyre/
+
+# Local IDE/editor/workspace configs that may contain secrets
+.vscode/*
