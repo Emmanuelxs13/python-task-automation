@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../store/authStore.ts";
 import { scanService } from "../api/scanService.ts";
+import { NewScanModal } from "../components/NewScanModal.tsx";
 import {
   Shield,
   LogOut,
@@ -15,6 +16,9 @@ import {
   XCircle,
   TrendingUp,
   Activity,
+  Eye,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Scan } from "../types/index.ts";
@@ -22,13 +26,53 @@ import type { Scan } from "../types/index.ts";
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [isNewScanModalOpen, setIsNewScanModalOpen] = useState(false);
 
   const { data: scans = [], isLoading } = useQuery({
     queryKey: ["scans"],
     queryFn: scanService.getScans,
   });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: scanService.deleteScan,
+    onSuccess: () => {
+      toast.success("Escaneo eliminado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["scans"] });
+    },
+    onError: () => {
+      toast.error("Error al eliminar el escaneo");
+    },
+  });
+
+  // Restart mutation
+  const restartMutation = useMutation({
+    mutationFn: scanService.restartScan,
+    onSuccess: () => {
+      toast.success("Escaneo reiniciado exitosamente");
+      queryClient.invalidateQueries({ queryKey: ["scans"] });
+    },
+    onError: () => {
+      toast.error("Error al reiniciar el escaneo");
+    },
+  });
+
+  const handleDelete = (id: number) => {
+    if (window.confirm("¿Estás seguro de eliminar este escaneo?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleRestart = (id: number) => {
+    restartMutation.mutate(id);
+  };
+
+  const handleViewDetails = (id: number) => {
+    navigate(`/scans/${id}`);
+  };
 
   const handleLogout = () => {
     logout();
@@ -254,7 +298,10 @@ export const DashboardPage = () => {
               </div>
             </div>
 
-            <button className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg font-semibold">
+            <button
+              onClick={() => setIsNewScanModalOpen(true)}
+              className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg font-semibold"
+            >
               <Plus className="h-5 w-5 mr-2" />
               Nuevo Escaneo
             </button>
@@ -276,7 +323,10 @@ export const DashboardPage = () => {
               <p className="text-gray-500 dark:text-gray-400 mb-6">
                 Comienza creando tu primer escaneo de seguridad
               </p>
-              <button className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+              <button
+                onClick={() => setIsNewScanModalOpen(true)}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+              >
                 <Plus className="h-5 w-5 mr-2" />
                 Crear Primer Escaneo
               </button>
@@ -301,36 +351,86 @@ export const DashboardPage = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Creado
                     </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredScans.map((scan: Scan) => (
                     <tr
                       key={scan.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                        onClick={() => handleViewDetails(scan.id)}
+                      >
                         <div className="flex items-center">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
                             {scan.target_url}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                        onClick={() => handleViewDetails(scan.id)}
+                      >
                         <span className="text-sm text-gray-600 dark:text-gray-300 capitalize">
                           {scan.scan_type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                        onClick={() => handleViewDetails(scan.id)}
+                      >
                         {getStatusBadge(scan.status)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                        onClick={() => handleViewDetails(scan.id)}
+                      >
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {scan.vulnerabilities?.length || 0}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(scan.created_at).toLocaleDateString()}
+                      <td
+                        className="px-6 py-4 whitespace-nowrap cursor-pointer"
+                        onClick={() => handleViewDetails(scan.id)}
+                      >
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(scan.created_at).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => handleViewDetails(scan.id)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            title="Ver detalles"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          {(scan.status === "completed" ||
+                            scan.status === "failed") && (
+                            <button
+                              onClick={() => handleRestart(scan.id)}
+                              disabled={restartMutation.isPending}
+                              className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50"
+                              title="Reiniciar escaneo"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(scan.id)}
+                            disabled={deleteMutation.isPending}
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -340,6 +440,12 @@ export const DashboardPage = () => {
           )}
         </div>
       </div>
+
+      {/* New Scan Modal */}
+      <NewScanModal
+        isOpen={isNewScanModalOpen}
+        onClose={() => setIsNewScanModalOpen(false)}
+      />
     </div>
   );
 };

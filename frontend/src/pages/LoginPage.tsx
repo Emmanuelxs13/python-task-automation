@@ -1,70 +1,90 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 import { authService } from "../api/authService.ts";
 import { useAuthStore } from "../store/authStore.ts";
+import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
 import { toast } from "sonner";
-import { Shield, Mail, Lock, ArrowRight } from "lucide-react";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const login = useAuthStore((state) => state.login);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
+  const loginMutation = useMutation({
+    mutationFn: authService.login,
+    onSuccess: (data) => {
+      console.log("✅ Login successful, response:", data);
 
-    try {
-      const tokenResponse = await authService.login({ email, password });
+      // Guardar token
+      const token = data.access_token;
+      localStorage.setItem("token", token);
 
-      // Guardar el token PRIMERO antes de hacer la petición de getCurrentUser
-      localStorage.setItem("token", tokenResponse.access_token);
+      // Crear objeto de usuario básico
+      const user = {
+        id: 1, // Temporal
+        email: email,
+        full_name: email.split("@")[0],
+      };
 
-      const user = await authService.getCurrentUser();
+      // Actualizar store de Zustand
+      login(user, token);
 
-      setAuth(user, tokenResponse.access_token);
-      toast.success("¡Bienvenido de nuevo! 🎉");
+      toast.success("¡Bienvenido de nuevo!");
       navigate("/dashboard");
-    } catch (error) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      toast.error(err.response?.data?.detail || "Credenciales inválidas");
-    } finally {
-      setLoading(false);
+    },
+    onError: (error: unknown) => {
+      console.error("❌ Login error:", error);
+      const err = error as {
+        response?: { data?: { detail?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        err.response?.data?.detail ||
+        err.message ||
+        "Error al iniciar sesión. Verifica tus credenciales.";
+      toast.error(errorMessage);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Por favor completa todos los campos");
+      return;
     }
+
+    console.log("🔐 Attempting login with:", { email, password: "***" });
+    loginMutation.mutate({ email, password });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo */}
-        <Link to="/" className="flex items-center justify-center mb-8 group">
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-3 rounded-2xl shadow-lg group-hover:shadow-xl transition-all">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg">
             <Shield className="h-8 w-8 text-white" />
           </div>
-          <span className="ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            SecureCheck
-          </span>
-        </Link>
-
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Bienvenido de Nuevo
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Iniciar Sesión
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Inicia sesión en tu cuenta de SecureCheck
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Bienvenido de nuevo a SecureCheck
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Correo Electrónico
               </label>
@@ -73,19 +93,20 @@ export const LoginPage = () => {
                 <input
                   id="email"
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="tu@empresa.com"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="tu@email.com"
+                  required
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
                 Contraseña
               </label>
@@ -93,25 +114,38 @@ export const LoginPage = () => {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   id="password"
-                  type="password"
-                  required
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="••••••••"
+                  required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg font-semibold flex items-center justify-center group"
+              disabled={loginMutation.isPending}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {loading ? (
-                <span className="flex items-center">
+              {loginMutation.isPending ? (
+                <span className="flex items-center justify-center">
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -132,34 +166,32 @@ export const LoginPage = () => {
                   Iniciando sesión...
                 </span>
               ) : (
-                <>
-                  Iniciar Sesión
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </>
+                "Iniciar Sesión"
               )}
             </button>
           </form>
 
+          {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               ¿No tienes una cuenta?{" "}
               <Link
                 to="/register"
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold hover:underline"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
               >
-                Créala ahora
+                Regístrate aquí
               </Link>
             </p>
           </div>
         </div>
 
-        {/* Back to home */}
+        {/* Back to Home */}
         <div className="mt-6 text-center">
           <Link
             to="/"
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex items-center"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
-            <span>← Volver al inicio</span>
+            ← Volver al inicio
           </Link>
         </div>
       </div>

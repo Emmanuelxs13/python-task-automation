@@ -1,45 +1,54 @@
 import { create } from "zustand";
-import type { User } from "../types";
+import { persist } from "zustand/middleware";
 
-export interface AuthState {
+interface User {
+  id: number;
+  email: string;
+  full_name: string;
+}
+
+interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: User, token: string) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
-  loadFromStorage: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
 
-  setAuth: (user, token) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-    set({ user, token, isAuthenticated: true });
-  },
+      login: (user: User, token: string) => {
+        console.log("🔐 AuthStore: Setting user and token", {
+          user,
+          token: token.substring(0, 20) + "...",
+        });
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+        });
+      },
 
-  logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-
-  loadFromStorage: () => {
-    const userStr = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-
-    if (userStr && token) {
-      try {
-        const user = JSON.parse(userStr);
-        set({ user, token, isAuthenticated: true });
-      } catch (error) {
-        console.error("Error loading auth from storage:", error);
-        localStorage.removeItem("user");
+      logout: () => {
+        console.log("👋 AuthStore: Logging out");
         localStorage.removeItem("token");
-      }
-    }
-  },
-}));
+        localStorage.removeItem("user");
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+        });
+      },
+    }),
+    {
+      name: "auth-storage",
+    },
+  ),
+);
